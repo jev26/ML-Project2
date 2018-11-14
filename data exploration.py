@@ -2,10 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from helper import *
 import scipy.sparse as sp
-
+from test import load_data_sparse
 
 data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
-rating = load_csv_data(data_name)
+
+rating = load_data_sparse(data_name)
+#rating = load_csv_data(data_name)
+
 print(rating.shape)
 x = rating.shape[1]
 print(type(x))
