@@ -26,3 +26,4 @@ plt.figure()
 plt.plot(mean_rating_user.T)
 plt.title('mean_rating_user')
 plt.show()
+
