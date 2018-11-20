@@ -2,7 +2,6 @@ import numpy as np
 import scipy
 import scipy.io
 import scipy.sparse as sp
-import matplotlib.pyplot as plt
 from helper import *
 import pandas as pd
 import time
@@ -75,6 +74,7 @@ def matrix_factorization_SGD(ratings):
         errors.append(rmse)
 
     # remove the initializations
+    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
     errors.remove(4)
     errors.remove(3)
     return prediction(user_features, item_features), errors
