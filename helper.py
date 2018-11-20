@@ -59,3 +59,15 @@ def asfptype(self):
         raise TypeError('cannot upcast [%s] to a floating '
                         'point format' % self.dtype.name)
 """
+def prediction(user_features,item_features):
+    """ compute the inner product of the 2 matrices"""
+    return item_features.T.dot(user_features)
+
+def compute_error(data, user_features, item_features, nonzero):
+    """compute the loss (MSE) of the prediction of nonzero elements."""
+    mse = 0
+    for row, col in nonzero:
+        Wd = item_features[:, row]
+        Zn = user_features[:, col]
+        mse += (data[row, col] - Zn.T.dot(Wd)) ** 2
+    return np.sqrt(1.0 * mse / len(nonzero))
