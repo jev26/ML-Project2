@@ -1,7 +1,7 @@
 """ Basic functions to use input and produce output format"""
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.sparse as sp
+import scipy as sp
 
 
 def read_txt(path):
@@ -92,8 +92,8 @@ def split_data_for_CV(ratings, min_num_ratings, p_test=0.1):
     valid_ratings = ratings[valid_films, :][:, valid_users]
 
     num_rows, num_cols = valid_ratings.shape
-    train = sp.lil_matrix((num_rows, num_cols))
-    test = sp.lil_matrix((num_rows, num_cols))
+    train = sp.sparse.lil_matrix((num_rows, num_cols))
+    test = sp.sparse.lil_matrix((num_rows, num_cols))
 
     print("the shape of original ratings. (# of row, # of col): {}".format(ratings.shape))
     print("the shape of valid ratings. (# of row, # of col): {}".format((num_rows, num_cols)))
@@ -110,7 +110,7 @@ def split_data_for_CV(ratings, min_num_ratings, p_test=0.1):
     print("Total number of nonzero elements in original data:{v}".format(v=ratings.nnz))
     print("Total number of nonzero elements in train data:{v}".format(v=train.nnz))
     print("Total number of nonzero elements in test data:{v}".format(v=test.nnz))
-    return valid_ratings, train, test
+    return train, test
 
 
 def init_MF(train, num_features):
@@ -131,3 +131,17 @@ def init_MF(train, num_features):
     item_features[1, :] = mean
 
     return user_features, item_features
+
+
+def build_k_indices(train, k_fold):
+    """build k indices for k-fold."""
+    np.random.seed(5)
+    nb_row = train.shape[0]
+    separation = int(nb_row / k_fold)
+    indices = np.random.permutation(nb_row)
+    print(indices)
+
+    k_indices = [indices[k * separation: (k + 1) * separation] for k in range(k_fold)]
+
+    return np.array(k_indices)
+

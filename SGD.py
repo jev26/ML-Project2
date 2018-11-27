@@ -62,11 +62,10 @@ def matrix_factorization_SGD(ratings):
 
 # Cross-validation algorithms
 
-def matrix_factorization_SGD_CV(train, test, num_features, lambda_user, lambda_item):
+def matrix_factorization_SGD_CV(train, test, num_features, lambda_user, lambda_item,stop_criterion):
     # define parameters
 
     errors = [5, 4]
-    stop_criterion = 1e-4
     e = [0]
     gamma = 0.01
 
