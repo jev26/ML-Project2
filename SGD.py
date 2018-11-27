@@ -7,25 +7,6 @@ import pandas as pd
 import time
 
 
-def init_MF(train, num_features):
-    """init the parameter for matrix factorization."""
-
-    #     user_features: shape = num_features, num_user
-    #     item_features: shape = num_features, num_item
-
-    num_items, num_users = train.shape
-
-    # initialize the user features to an identity matrix
-    user_features = np.eye(num_features, num_users)  # Z
-
-    # Assignment of the average rating for that movie as the 1rst row, and small random numbers for the remaining entries
-    r, c, v = scipy.sparse.find(train[:, 1])
-    mean = np.mean(v)
-    item_features = np.random.rand(num_features, num_items)
-    item_features[1, :] = mean
-
-    return user_features, item_features
-
 
 # ALS and SGD
 
