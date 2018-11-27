@@ -118,3 +118,53 @@ def ALS(ratings):
 
 
 
+def ALS_CV(train, test, num_features, lambda_user, lambda_item, stop_criterion):
+    """Alternating least squares (ALS)"""
+    #define parameters
+
+    error_list = [0, 0]
+
+    # set seed
+    np.random.seed(988)
+
+    # init matrix
+    user_features, item_features = init_MF(train, num_features)
+
+    #group indices by row or column
+    nonzero_ratings_tr, nonzero_item_userindices_tr, nonzero_user_itemindices_tr = build_index_groups(train)
+    nonzero_ratings_te = list(zip(test.nonzero())).reshape((-1,2))
+
+    #get the number of users per item and the number of items per user
+    nonzero_users_per_item_count = [len(users) for items, users in nonzero_item_userindices_tr]
+    nonzero_items_per_user_count = [len(items) for users, items in nonzero_user_itemindices_tr]
+
+
+    #run ALS
+    print('Start ALS learning...')
+
+    #stop if the error difference is smaller than the stop criterion
+    while(np.abs(error_list[-2]-error_list[-1]) > stop_criterion):
+        # shuffle the training rating indices
+        np.random.shuffle(nonzero_ratings_tr)
+
+        # update user_features and item_features
+        user_features = update_user_feature(train, item_features, lambda_user, nonzero_items_per_user_count, nonzero_item_userindices_tr)
+        item_features = update_item_feature(train, user_features, lambda_item, nonzero_users_per_item_count, nonzero_user_itemindices_tr)
+
+        # compute error (RMSE)
+        rmse = compute_error(train, user_features, item_features, np.array(nonzero_ratings_tr).reshape(-1, 2))
+        print("RMSE: {}.".format(rmse))
+        error_list.append(rmse)
+
+
+    #remove initial values
+    error_list.pop(0)
+    error_list.pop(0)
+
+    #return preduction
+    return prediction(user_features, item_features), error_list
+
+
+
+
+
