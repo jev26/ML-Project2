@@ -7,8 +7,6 @@ import pandas as pd
 import time
 from itertools import groupby
 
-from helpers import init_MF
-
 
 #taken from course
 def build_index_groups(train):
