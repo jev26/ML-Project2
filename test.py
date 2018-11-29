@@ -75,28 +75,25 @@ def data_exploration(data):
     plt.show()"""
 
     print(MeanPerFilm.shape)
-
-    MeanPerFilm_rounded = round(MeanPerFilm,1)
-    print(MeanPerFilm_rounded)
-    MeanPerFilm_count = MeanPerFilm_rounded.value_counts()
+    print(type(MeanPerFilm))
 
     plt.figure()
-    plt.hist(MeanPerFilm_count,range=[1,5])#bins='auto',range=[1,5])
+    plt.hist(np.transpose(MeanPerFilm),bins=30)#,range=[1,5])#bins='auto',range=[1,5])
     plt.xlabel("Mean Per Film")
     plt.ylabel("Freqeuncy")
     plt.show()
 
-    """"# Variance in Rating Per Film
+    # Variance in Rating Per Film
     StdPerFilm = data.groupby('c').std()
 
-    plt.figure()
+    """plt.figure()
     plt.plot(StdPerFilm)
     plt.xlabel("Film")
     plt.ylabel("Std")
-    plt.show()
+    plt.show()"""
 
     plt.figure()
-    plt.hist(StdPerFilm, bins=5)
+    plt.hist(np.transpose(StdPerFilm), bins=30)
     plt.xlabel("Variance Per Film")
     plt.ylabel("Freqeuncy")
-    plt.show()"""
+    plt.show()
