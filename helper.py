@@ -122,7 +122,8 @@ def init_MF(train, num_features):
     num_items, num_users = train.shape
 
     # initialize the user features to an identity matrix
-    user_features = np.eye(num_features, num_users)  # Z
+    #user_features = np.eye(num_features, num_users)  # Z
+    user_features = np.random.rand(num_features, num_users)
 
     # Assignment of the average rating for that movie as the 1rst row, and small random numbers for the remaining entries
     r, c, v = sp.sparse.find(train[:, 1])
