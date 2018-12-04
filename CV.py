@@ -22,3 +22,5 @@ def cross_validation(SGDModel,ratings, k_fold ,nb_features ,lambdas ,min_nb_rati
                     break
             print('Mean errors = %s, num_features = %s, lambda_user = %s, lambda_item = %s, std = %s' % (
             np.mean(errors), nb_feature, lambda_, lambda_, np.std(errors)))
+
+    # put plot

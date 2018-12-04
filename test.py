@@ -9,9 +9,9 @@ def load_data_sparse(path_dataset, exploration = True):
     #print(data.head(10))
 
     data['r'] = data.Id.str.split('_').str.get(0).str[1:]
-
     data['c'] = data.Id.str.split('_').str.get(1).str[1:]
-    print(data.head(10))
+
+    #print(data.head(10))
 
     if exploration : data_exploration(data)
 
@@ -20,16 +20,21 @@ def load_data_sparse(path_dataset, exploration = True):
     # column indices
     col_ind = np.array(data['c'], dtype=int)
     # data to be stored in COO sparse matrix
-    data = np.array(data['Prediction'], dtype=int)
+    ratings = np.array(data['Prediction'], dtype=int)
 
     # create COO sparse matrix from three arrays
-    mat_coo = sparse.coo_matrix((data, (row_ind, col_ind)))
+    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)))
     #print(mat_coo.shape)
 
     mat_lil = mat_coo.tolil()
     #print(mat_lil.shape)
 
-    return mat_lil
+    data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
+    data = data.drop(['Id'], axis = 1)
+
+    #print(data.head(10))
+
+    return mat_lil, data
 
 def data_exploration(data):
     # 10'000 users and 1'000 films
@@ -44,11 +49,11 @@ def data_exploration(data):
     print('mean: ' + str(np.mean(NbrRatePerUser)))
     print('================')
 
-    plt.figure()
+    f1 = plt.figure()
     plt.hist(NbrRatePerUser, bins=1000)
     plt.xlabel("Nbr Rate Per User")
     plt.ylabel("Freqeuncy")
-    plt.show()
+    #f1.show()
 
     # Nbr Rate Per Film
     NbrRatePerFilm = data['c'].value_counts()
@@ -59,11 +64,12 @@ def data_exploration(data):
     print('mean: ' + str(np.mean(NbrRatePerFilm)))
     print('================')
 
-    plt.figure()
+    f2 = plt.figure()
     plt.hist(NbrRatePerFilm, bins=500)
     plt.xlabel("Ndr Rate Per Film")
     plt.ylabel("Freqeuncy")
-    plt.show()
+    #f2.show()
+
 
     # Mean Rate Per Film
     MeanPerFilm = data.groupby('c').mean()
@@ -77,11 +83,11 @@ def data_exploration(data):
     print(MeanPerFilm.shape)
     print(type(MeanPerFilm))
 
-    plt.figure()
+    f3 = plt.figure(3)
     plt.hist(np.transpose(MeanPerFilm),bins=30)#,range=[1,5])#bins='auto',range=[1,5])
     plt.xlabel("Mean Per Film")
     plt.ylabel("Freqeuncy")
-    plt.show()
+    #plt.show()
 
     # Variance in Rating Per Film
     StdPerFilm = data.groupby('c').std()
@@ -92,8 +98,10 @@ def data_exploration(data):
     plt.ylabel("Std")
     plt.show()"""
 
-    plt.figure()
+    f4 = plt.figure(4)
     plt.hist(np.transpose(StdPerFilm), bins=30)
     plt.xlabel("Variance Per Film")
     plt.ylabel("Freqeuncy")
+    #plt.show()
+
     plt.show()
