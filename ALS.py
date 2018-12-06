@@ -1,9 +1,4 @@
-import numpy as np
-import scipy
-import scipy.io
-import scipy.sparse as sp
 from helper import *
-import pandas as pd
 import time
 from itertools import groupby
 
@@ -78,7 +73,7 @@ def ALS(ratings):
     lambda_user = 0.1
     lambda_film = 0.1
     stop_criterion = 1e-4
-    errors = [4, 2]  # record the rmse for each step
+    errors = [5, 4]  # record the rmse for each step
     iter = 0
 
     # set seed
@@ -117,7 +112,7 @@ def ALS(ratings):
 def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
     """Alternating Least Squares (ALS) algorithm."""
     # define parameters
-    errors = [4, 2]  # record the rmse for each step
+    errors = [5, 4]  # record the rmse for each step
     iter = 0
 
     # set seed
@@ -145,10 +140,10 @@ def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
 
         # RMSE
         rmse = compute_error(train, user_features, item_features, nz_ratings2)
-        print("RMSE: {}.".format(rmse))
+        #print("RMSE: {}.".format(rmse))
 
         errors.append(rmse)
-    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
+    #print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
     errors.remove(5)
     errors.remove(4)
 
