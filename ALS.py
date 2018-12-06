@@ -76,9 +76,10 @@ def ALS(ratings):
     # define parameters
     num_features = 40  # K in the lecture notes
     lambda_user = 0.1
-    lambda_item = 0.1
-    stop_criterion = 1e-6
-    error_list = [4, 2]  # record the rmse for each step
+    lambda_film = 0.1
+    stop_criterion = 1e-4
+    errors = [4, 2]  # record the rmse for each step
+    iter = 0
 
     # set seed
     np.random.seed(988)
@@ -89,75 +90,71 @@ def ALS(ratings):
     nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(ratings)
     nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
     nnz_items_per_user = [len(array) for user, array in nz_user_itemindices]
+    nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
 
     # start of the ALS-WR algorithm.
     print("learn the matrix factorization using ALS...")
-    while ((error_list[-2] - error_list[-1]) > stop_criterion):
+    while ((errors[-2] - errors[-1]) > stop_criterion):
+        iter += 1
+
         user_features = update_user_feature(ratings, item_features, lambda_user, nnz_items_per_user,
                                             nz_user_itemindices)
-        item_features = update_item_feature(ratings, user_features, lambda_item, nnz_users_per_item,
+        item_features = update_item_feature(ratings, user_features, lambda_film, nnz_users_per_item,
                                             nz_item_userindices)
 
         # RMSE
-        nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
         rmse = compute_error(ratings, user_features, item_features, nz_ratings2)
         print("RMSE: {}.".format(rmse))
 
-        error_list.append(rmse)
-
-    # Remove the initializations
-    error_list.pop(0)
-    error_list.pop(0)
-
-    return prediction(user_features, item_features), error_list
+        errors.append(rmse)
+    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
+    errors.remove(5)
+    errors.remove(4)
+    return prediction(user_features, item_features), errors
 
 
 
-def ALS_CV(train, test, num_features, lambda_user, lambda_item, stop_criterion):
-    """Alternating least squares (ALS)"""
-    #define parameters
-
-    errors = [5, 4]
+def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
+    """Alternating Least Squares (ALS) algorithm."""
+    # define parameters
+    errors = [4, 2]  # record the rmse for each step
+    iter = 0
 
     # set seed
     np.random.seed(988)
 
-    # init matrix
+    # init ALS
     user_features, item_features = init_MF(train, num_features)
 
-    #group indices by row or column
-    nonzero_ratings_tr, nonzero_item_userindices_tr, nonzero_user_itemindices_tr = build_index_groups(train)
-    nonzero_ratings_te = list(zip(test.nonzero())).reshape((-1,2))
+    nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(train)
+    nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
+    nnz_items_per_user = [len(array) for user, array in nz_user_itemindices]
+    nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
 
-    #get the number of users per item and the number of items per user
-    nonzero_users_per_item_count = [len(users) for items, users in nonzero_item_userindices_tr]
-    nonzero_items_per_user_count = [len(items) for users, items in nonzero_user_itemindices_tr]
+    nz_ratings_te, nz_item_userindices_te, nz_user_itemindices_te = build_index_groups(test)
 
+    # start of the ALS-WR algorithm.
+    print("learn the matrix factorization using ALS...")
+    while ((errors[-2] - errors[-1]) > stop_criterion):
+        iter += 1
 
-    #run ALS
-    print('Start ALS learning...')
+        user_features = update_user_feature(train, item_features, lambda_user, nnz_items_per_user,
+                                            nz_user_itemindices)
+        item_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
+                                            nz_item_userindices)
 
-    #stop if the error difference is smaller than the stop criterion
-    while(np.abs(errors[-2]-errors[-1]) > stop_criterion):
-        # shuffle the training rating indices
-        np.random.shuffle(nonzero_ratings_tr)
-
-        # update user_features and item_features
-        user_features = update_user_feature(train, item_features, lambda_user, nonzero_items_per_user_count, nonzero_item_userindices_tr)
-        item_features = update_item_feature(train, user_features, lambda_item, nonzero_users_per_item_count, nonzero_user_itemindices_tr)
-
-        # compute error (RMSE)
-        rmse = compute_error(train, user_features, item_features, np.array(nonzero_ratings_tr).reshape(-1, 2))
+        # RMSE
+        rmse = compute_error(train, user_features, item_features, nz_ratings2)
         print("RMSE: {}.".format(rmse))
+
         errors.append(rmse)
-
-
-    #remove initial values
+    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
     errors.remove(5)
     errors.remove(4)
 
-    #return preduction
-    return prediction(user_features, item_features), errors
+    rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))
+    print("RMSE on test data: {}.".format(rmse))
+    return prediction(user_features, item_features), rmse
 
 
 
