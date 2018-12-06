@@ -11,7 +11,15 @@ def load_data_sparse(path_dataset, exploration = True):
     data['r'] = data.Id.str.split('_').str.get(0).str[1:]
     data['c'] = data.Id.str.split('_').str.get(1).str[1:]
 
+    data['r'] = data['r'].apply(lambda l: int(l) - 1)
+    data['c'] = data['c'].apply(lambda l: int(l) - 1)
+
     #print(data.head(10))
+    #print(data.columns)
+    #print(data.head(1))
+
+    # print(data['c'].head(6))
+    # print(data['r'].tail(6))
 
     if exploration : data_exploration(data)
 
@@ -22,17 +30,28 @@ def load_data_sparse(path_dataset, exploration = True):
     # data to be stored in COO sparse matrix
     ratings = np.array(data['Prediction'], dtype=int)
 
+    NbrMovie = int(data['r'].max()) + 1
+    NbrUser = int(data['c'].max()) + 1
+
     # create COO sparse matrix from three arrays
-    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)))
+    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
+
     #print(mat_coo.shape)
 
     mat_lil = mat_coo.tolil()
     #print(mat_lil.shape)
 
+    # change panda frame
+    #df = pd.DataFrame(np.zeros((NbrMovie,NbrUser)))
+
+    #for i in range(data.shape[0]):
+    #    df[row_ind[i],col_ind[i]] = ratings[i]
+
     data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
     data = data.drop(['Id'], axis = 1)
 
-    #print(data.head(10))
+    #print(data.shape)
+    #print(data.head(0))
 
     return mat_lil, data
 
