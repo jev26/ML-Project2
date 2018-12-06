@@ -28,90 +28,87 @@ def build_index_groups(train):
 
 def update_user_feature(
         train, item_features, lambda_user,
-        nonzero_items_per_user, nonzero_user_itemindices):
+        nnz_items_per_user, nz_user_itemindices):
     """update user feature matrix."""
-    user_count = nonzero_items_per_user.shape[0]
-    feature_count = item_features.shape[0]
-    lambda_I = lambda_user * sp.eye(feature_count)
-    updated_user_features = np.zeros((feature_count, user_count))
 
-    for user, items in nonzero_user_itemindices:
-        # extract the columns corresponding to the prediction for given item
-        M = item_features[:, items]
+    # update and return user feature.
+    [num_features, num_items] = item_features.shape
+    [num_items, num_users] = train.shape
+    user_features = np.eye(num_features, num_users)
 
-        # update column row of user features
-        V = M @ train[items, user]
-        A = M @ M.T + nonzero_items_per_user[user] * lambda_I
-        X = np.linalg.solve(A, V)
-        updated_user_features[:, user] = np.copy(X.T)
-    return updated_user_features
+    # The update is based on the derived ALS formula Z = (WWT + λIK)-1WX, the regularized term λIK is also adjusted based on the number of ratings of each user.
+    for user, item in nz_user_itemindices:
+        W = item_features[:, item]
+        X = train[item, user]
+        I = np.eye(num_features, num_features)
+        M = W @ W.T + nnz_items_per_user[user] * lambda_user * I
+        update = np.linalg.solve(M, W @ X)
+        update = update.reshape(num_features)
+        user_features[:, user] = update
+
+    return user_features
 
 
 def update_item_feature(
         train, user_features, lambda_item,
-        nonzero_users_per_item, nonzero_item_userindices):
+        nnz_users_per_item, nz_item_userindices):
     """update item feature matrix."""
-    item_count = nonzero_users_per_item.shape[0]
-    feature_count = user_features.shape[0]
-    lambda_I = lambda_item * sp.eye(feature_count)
-    updated_item_features = np.zeros((feature_count, item_count))
+    # update and return item feature.
+    [num_features, num_users] = user_features.shape
+    [num_items, num_users] = train.shape
+    item_features = np.eye(num_features, num_items)
 
-    for item, users in nonzero_item_userindices:
-        # extract the columns corresponding to the prediction for given user
-        M = user_features[:, users]
-        V = M @ train[item, users].T
-        A = M @ M.T + nonzero_users_per_item[item] * lambda_I
-        X = np.linalg.solve(A, V)
-        updated_item_features[:, item] = np.copy(X.T)
-    return updated_item_features
+    # The update is based on the derived ALS formula W = (ZZT + λIK)-1ZXT, the regularized term λIK is also adjusted based on the number of ratings of each item.
+    for item, user in nz_item_userindices:
+        Z = user_features[:, user]
+        X = train[item, user]
+        I = np.eye(num_features, num_features)
+        M = Z @ Z.T + nnz_users_per_item[item] * lambda_item * I
+        update = np.linalg.solve(M, Z @ X.T)
+        update = update.reshape(num_features)
+        item_features[:, item] = update
+
+    return item_features
 
 
 def ALS(ratings):
-    """Alternating least squares (ALS)"""
-    #define parameters
-
-    num_features = 20
+    """Alternating Least Squares (ALS) algorithm."""
+    # define parameters
+    num_features = 40  # K in the lecture notes
     lambda_user = 0.1
-    lambda_item = 0.7
-    stop_criterion = 1e-4
-    change = 1
-    error_list = [0, 0]
+    lambda_item = 0.1
+    stop_criterion = 1e-6
+    error_list = [4, 2]  # record the rmse for each step
 
     # set seed
     np.random.seed(988)
 
-    # init matrix
+    # init ALS
     user_features, item_features = init_MF(ratings, num_features)
 
-    #group indices by row or column
-    nonzero_ratings, nonzero_item_userindices, nonzero_user_itemindices = build_index_groups(ratings)
+    nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(ratings)
+    nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
+    nnz_items_per_user = [len(array) for user, array in nz_user_itemindices]
 
-    #get the number of users per item and the number of items per user
-    nonzero_users_per_item_count = [len(users) for items, users in nonzero_item_userindices]
-    nonzero_items_per_user_count = [len(items) for users, items in nonzero_user_itemindices]
+    # start of the ALS-WR algorithm.
+    print("learn the matrix factorization using ALS...")
+    while ((error_list[-2] - error_list[-1]) > stop_criterion):
+        user_features = update_user_feature(ratings, item_features, lambda_user, nnz_items_per_user,
+                                            nz_user_itemindices)
+        item_features = update_item_feature(ratings, user_features, lambda_item, nnz_users_per_item,
+                                            nz_item_userindices)
 
-
-    #run ALS
-    print('Start ALS learning...')
-
-    #stop if the error difference is smaller than the stop criterion
-    while(np.abs(error_list[-2]-error_list[-1]) > stop_criterion):
-
-        # update user_features and item_features
-        user_features = update_user_feature(ratings, item_features, lambda_user, nonzero_items_per_user_count, nonzero_item_userindices)
-        item_features = update_item_feature(ratings, user_features, lambda_item, nonzero_users_per_item_count, nonzero_user_itemindices)
-
-        # compute error (RMSE)
-        rmse = compute_error(ratings, user_features, item_features, nonzero_ratings)
+        # RMSE
+        nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
+        rmse = compute_error(ratings, user_features, item_features, nz_ratings2)
         print("RMSE: {}.".format(rmse))
+
         error_list.append(rmse)
 
-
-    #remove initial values
+    # Remove the initializations
     error_list.pop(0)
     error_list.pop(0)
 
-    #return preduction
     return prediction(user_features, item_features), error_list
 
 
@@ -120,7 +117,7 @@ def ALS_CV(train, test, num_features, lambda_user, lambda_item, stop_criterion):
     """Alternating least squares (ALS)"""
     #define parameters
 
-    error_list = [0, 0]
+    errors = [5, 4]
 
     # set seed
     np.random.seed(988)
@@ -141,7 +138,7 @@ def ALS_CV(train, test, num_features, lambda_user, lambda_item, stop_criterion):
     print('Start ALS learning...')
 
     #stop if the error difference is smaller than the stop criterion
-    while(np.abs(error_list[-2]-error_list[-1]) > stop_criterion):
+    while(np.abs(errors[-2]-errors[-1]) > stop_criterion):
         # shuffle the training rating indices
         np.random.shuffle(nonzero_ratings_tr)
 
@@ -152,15 +149,15 @@ def ALS_CV(train, test, num_features, lambda_user, lambda_item, stop_criterion):
         # compute error (RMSE)
         rmse = compute_error(train, user_features, item_features, np.array(nonzero_ratings_tr).reshape(-1, 2))
         print("RMSE: {}.".format(rmse))
-        error_list.append(rmse)
+        errors.append(rmse)
 
 
     #remove initial values
-    error_list.pop(0)
-    error_list.pop(0)
+    errors.remove(5)
+    errors.remove(4)
 
     #return preduction
-    return prediction(user_features, item_features), error_list
+    return prediction(user_features, item_features), errors
 
 
 
