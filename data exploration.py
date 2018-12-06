@@ -10,7 +10,14 @@ data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
 ratings_sparse, ratings_pandas = load_data_sparse(data_name, False)
 #rating = load_csv_data(data_name)
 
+#print(ratings_sparse[0,:])
+#print(ratings_sparse[:,0])
+
+#print(ratings_pandas.head(10))
+
 print(ratings_sparse.shape)
+print(ratings_pandas.shape)
+
 NbrUsers = ratings_sparse.shape[1]
 NbrFilm = ratings_sparse.shape[1]
 
