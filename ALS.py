@@ -65,52 +65,8 @@ def update_item_feature(
 
     return item_features
 
-
-def ALS(ratings):
-    """Alternating Least Squares (ALS) algorithm."""
-    # define parameters
-    num_features = 40  # K in the lecture notes
-    lambda_user = 0.1
-    lambda_film = 0.1
-    stop_criterion = 1e-4
-    errors = [5, 4]  # record the rmse for each step
-    iter = 0
-
-    # set seed
-    np.random.seed(988)
-
-    # init ALS
-    user_features, item_features = init_MF(ratings, num_features)
-
-    nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(ratings)
-    nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
-    nnz_items_per_user = [len(array) for user, array in nz_user_itemindices]
-    nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
-
-    # start of the ALS-WR algorithm.
-    print("learn the matrix factorization using ALS...")
-    while ((errors[-2] - errors[-1]) > stop_criterion):
-        iter += 1
-
-        user_features = update_user_feature(ratings, item_features, lambda_user, nnz_items_per_user,
-                                            nz_user_itemindices)
-        item_features = update_item_feature(ratings, user_features, lambda_film, nnz_users_per_item,
-                                            nz_item_userindices)
-
-        # RMSE
-        rmse = compute_error(ratings, user_features, item_features, nz_ratings2)
-        print("RMSE: {}.".format(rmse))
-
-        errors.append(rmse)
-    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
-    errors.remove(5)
-    errors.remove(4)
-    return prediction(user_features, item_features), errors
-
-
-
-def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
-    """Alternating Least Squares (ALS) algorithm."""
+"""def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
+    #Alternating Least Squares (ALS) algorithm.
     # define parameters
     errors = [5, 4]  # record the rmse for each step
     iter = 0
@@ -149,10 +105,11 @@ def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
 
     rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))
     print("RMSE on test data: {}.".format(rmse))
-    return prediction(user_features, item_features), rmse
+    return prediction(user_features, item_features), rmse"""
 
-def ALS_final_prediction(train, num_features, lambda_user, lambda_film, stop_criterion):
-    """Alternating Least Squares (ALS) algorithm."""
+
+def ALS_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
+    #Alternating Least Squares (ALS) algorithm.
     # define parameters
     errors = [5, 4]  # record the rmse for each step
     iter = 0
@@ -187,8 +144,22 @@ def ALS_final_prediction(train, num_features, lambda_user, lambda_film, stop_cri
     errors.remove(5)
     errors.remove(4)
 
-    return prediction(user_features, item_features)
+    return prediction(user_features, item_features), user_features, item_features
 
+
+def ALS_test_error_calculation(test, user_features, item_features):
+
+    # find the non-zero ratings indices
+    nonzero_row, nonzero_col = test.nonzero()
+    nonzero_test = list(zip(nonzero_row, nonzero_col))
+
+    #nz_ratings_te, nz_item_userindices_te, nz_user_itemindices_te = build_index_groups(test)
+    nz_ratings_te, _, _ = build_index_groups(test)
+
+    rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))
+    print("RMSE on test data: {}.".format(rmse))
+
+    return rmse
 
 
 

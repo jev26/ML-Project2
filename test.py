@@ -11,17 +11,10 @@ def load_data_sparse(path_dataset, exploration = True):
     data['r'] = data.Id.str.split('_').str.get(0).str[1:]
     data['c'] = data.Id.str.split('_').str.get(1).str[1:]
 
+    if exploration: data_exploration(data)
+
     data['r'] = data['r'].apply(lambda l: int(l) - 1)
     data['c'] = data['c'].apply(lambda l: int(l) - 1)
-
-    #print(data.head(10))
-    #print(data.columns)
-    #print(data.head(1))
-
-    # print(data['c'].head(6))
-    # print(data['r'].tail(6))
-
-    if exploration : data_exploration(data)
 
     # row indices
     row_ind = np.array(data['r'], dtype=int)
@@ -35,7 +28,6 @@ def load_data_sparse(path_dataset, exploration = True):
 
     # create COO sparse matrix from three arrays
     mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
-
     #print(mat_coo.shape)
 
     mat_lil = mat_coo.tolil()
@@ -69,7 +61,7 @@ def data_exploration(data):
     print('================')
 
     f1 = plt.figure()
-    plt.hist(NbrRatePerUser, bins=1000)
+    plt.hist(NbrRatePerUser, bins=100)
     plt.xlabel("Nbr Rate Per User")
     plt.ylabel("Freqeuncy")
     #f1.show()
@@ -84,8 +76,8 @@ def data_exploration(data):
     print('================')
 
     f2 = plt.figure()
-    plt.hist(NbrRatePerFilm, bins=500)
-    plt.xlabel("Ndr Rate Per Film")
+    plt.hist(NbrRatePerFilm, bins=50)
+    plt.xlabel("Nbr Rate Per Film")
     plt.ylabel("Freqeuncy")
     #f2.show()
 

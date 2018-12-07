@@ -4,10 +4,11 @@ from helper import *
 import scipy.sparse as sp
 from test import load_data_sparse
 #from CV import cross_validation
-from SGD.py import SGD_final_prediction
-from ALS.py import ALS_final_prediction
+#from SGD.py import SGD_final_prediction
+from SGD import *
+from ALS import *
 from Visualization import cv_result
-from sklearn.linear_model import LinearRegression
+#from sklearn.linear_model import LinearRegression
 
 data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
 
@@ -36,17 +37,20 @@ prediction = []
 
 ## Launch Algorithm
 # SGD
-nb_feature = 10
-lambda_ = np.logspace(-5)
+nb_feature = 20
+lambda_ = 0.004
 #pred, error = matrix_factorization_SGD_CV(train, test, nb_feature, lambda_, lambda_, stop_criterion)
-pred = SGD_final_prediction(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+#pred = SGD_final_prediction(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+pred, _, _ = matrix_factorization_SGD_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
 prediction.append(pred)
 
 # ALS
-nb_feature = 10
-lambda_ = np.logspace(-5)
-pred, error = ALS_final_prediction(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+nb_feature = 8
+lambda_ = 0.081
+pred, _, _ = ALS_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
 prediction.append(pred)
+
+print(prediction)
 
 ## Blending function
 # faire aussi un learning process pour avoir les poids ?
