@@ -32,7 +32,7 @@ stop_criterion = 1e-2
 prediction = []
 
 ## Learning
-# in Learning.py ==> aim to find the best parameter for each model
+# in Learning_methods.py ==> aim to find the best parameter for each model
 # then the parameters are specified here to learn the best model for the final prediction
 
 ## Launch Algorithm
