@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
+import csv
 
 
 def read_txt(path):
@@ -15,16 +16,15 @@ def load_csv_data(path_dataset):
     data = read_txt(path_dataset)[1:]
     return preprocess_data(data)
 
+def deal_line(line):
+    pos, rating = line.split(',')
+    row, col = pos.split("_")
+    row = row.replace("r", "")
+    col = col.replace("c", "")
+    return int(row), int(col), float(rating)
 
 def preprocess_data(data):
     """preprocessing the text data, conversion to numerical array format."""
-
-    def deal_line(line):
-        pos, rating = line.split(',')
-        row, col = pos.split("_")
-        row = row.replace("r", "")
-        col = col.replace("c", "")
-        return int(row), int(col), float(rating)
 
     def statistics(data):
         row = set([line[0] for line in data])
@@ -146,3 +146,61 @@ def build_k_indices(train, k_fold):
 
     return np.array(k_indices)
 
+def create_submission_from_prediction(prediction, output_name):
+
+    def prediction_transformed(prediction, ids_process):
+        """ return the prediction transformed for the submission """
+        y = []
+        for i in range(len(ids_process)):
+            row = ids_process[i][0]
+            col = ids_process[i][1]
+            y.append(prediction[row - 1, col - 1])
+        return y
+
+    def create_csv_submission(ids, y_pred, name):
+        """
+        Creates an output file in csv format for submission to kaggle
+        Arguments: ids (event ids associated with each prediction)
+                   y_pred (predicted class labels)
+                   name (string name of .csv output file to be created)
+        """
+        with open(name, 'w') as csvfile:
+            fieldnames = ['Id', 'Prediction']
+            writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
+            writer.writeheader()
+            for r1, r2 in zip(ids, y_pred):
+                writer.writerow({'Id': str(r1), 'Prediction': float(r2)})
+
+    def round(x):
+        if (x < 1):
+            return 1
+        elif (x > 5):
+            return 5
+        else:
+            return x
+
+    def transform(ids_txt):
+        """ split the text index"""
+
+        def deal_line(line):
+            pos, rating = line.split(',')
+            return str(pos)
+
+        ids = [deal_line(line) for line in ids_txt]
+        return ids
+
+    prediction = np.vectorize(round)(prediction)
+
+    DATA_TEST_PATH = 'data/sampleSubmission.csv'
+
+    ids_txt = read_txt(DATA_TEST_PATH)[1:]
+    ids_process = [deal_line(line) for line in ids_txt]
+
+    # prediction under the right format
+    y = prediction_transformed(prediction, ids_process)
+
+    y = np.rint(y)
+
+    ids = transform(ids_txt)
+    OUTPUT_PATH = output_name
+    create_csv_submission(ids, y, OUTPUT_PATH)
