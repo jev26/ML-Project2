@@ -116,3 +116,8 @@ def data_exploration(data):
     #plt.show()
 
     plt.show()
+
+    f1.savefig('Figures/NbrRatePerUser.png')
+    f2.savefig('Figures/NbrRatePerFilm.png')
+    f3.savefig('Figures/FilmMean.png')
+    f4.savefig('Figures/FilmVariance.png')

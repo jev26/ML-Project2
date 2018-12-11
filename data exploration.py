@@ -7,7 +7,7 @@ from SGD import *
 
 data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
 
-ratings_sparse, ratings_pandas = load_data_sparse(data_name, False)
+ratings_sparse, ratings_pandas = load_data_sparse(data_name, True)
 #rating = load_csv_data(data_name)
 
 #print(ratings_sparse[0,:])
