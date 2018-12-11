@@ -6,7 +6,8 @@ from test import load_data_sparse
 from SGD import *
 from ALS import *
 from Visualization import cv_result
-from sklearn.linear_model import LinearRegression
+#from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from crossval import *
 
 data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
@@ -69,10 +70,11 @@ print("learn blending wieghts")
 y = pandas['Rating']
 X = np.transpose(prediction)
 
-clf = LinearRegression()
-reg = clf.fit(X, y)
+linreg = Ridge(alpha=0.1, fit_intercept=False)
+linreg.fit(X, y)
 
-print('Weights of the different models:', clf.coef_)
+print('Weights of the different models:', linreg.coef_)
+print('Final score:', linreg.score(X, y))
 
 """"# faire aussi un learning process pour avoir les poids
 seed = 1

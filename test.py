@@ -62,8 +62,8 @@ def data_exploration(data):
 
     f1 = plt.figure()
     plt.hist(NbrRatePerUser, bins=100)
-    plt.xlabel("Nbr Rate Per User")
-    plt.ylabel("Freqeuncy")
+    plt.xlabel("Number Rate Per User")
+    plt.ylabel("Counts")
     #f1.show()
 
     # Nbr Rate Per Film
@@ -77,8 +77,8 @@ def data_exploration(data):
 
     f2 = plt.figure()
     plt.hist(NbrRatePerFilm, bins=50)
-    plt.xlabel("Nbr Rate Per Film")
-    plt.ylabel("Freqeuncy")
+    plt.xlabel("Number Rate Per Film")
+    plt.ylabel("Counts")
     #f2.show()
 
 
@@ -97,7 +97,7 @@ def data_exploration(data):
     f3 = plt.figure(3)
     plt.hist(np.transpose(MeanPerFilm),bins=30)#,range=[1,5])#bins='auto',range=[1,5])
     plt.xlabel("Mean Per Film")
-    plt.ylabel("Freqeuncy")
+    plt.ylabel("Counts")
     #plt.show()
 
     # Variance in Rating Per Film
@@ -112,8 +112,25 @@ def data_exploration(data):
     f4 = plt.figure(4)
     plt.hist(np.transpose(StdPerFilm), bins=30)
     plt.xlabel("Variance Per Film")
-    plt.ylabel("Freqeuncy")
+    plt.ylabel("Counts")
     #plt.show()
+
+    # Mean Rate Per Film
+    MeanPerUser = data.groupby('r').mean()
+
+    f5 = plt.figure(5)
+    plt.hist(np.transpose(MeanPerUser), bins=30)  # ,range=[1,5])#bins='auto',range=[1,5])
+    plt.xlabel("Mean Per User")
+    plt.ylabel("Counts")
+
+    # Variance in Rating Per Film
+    StdPerUser = data.groupby('r').std()
+
+    f6 = plt.figure(6)
+    plt.hist(np.transpose(StdPerFilm), bins=30)
+    plt.xlabel("Variance Per User")
+    plt.ylabel("Counts")
+    # plt.show()
 
     plt.show()
 
@@ -121,3 +138,5 @@ def data_exploration(data):
     f2.savefig('Figures/NbrRatePerFilm.png')
     f3.savefig('Figures/FilmMean.png')
     f4.savefig('Figures/FilmVariance.png')
+    f5.savefig('Figures/UserMean.png')
+    f6.savefig('Figures/UserVariance.png')
