@@ -96,7 +96,7 @@ def data_exploration(data):
 
     f3 = plt.figure(3)
     plt.hist(np.transpose(MeanPerFilm),bins=30)#,range=[1,5])#bins='auto',range=[1,5])
-    plt.xlabel("Mean over all Users")
+    plt.xlabel("Mean Rating over all Users")
     plt.ylabel("Number of Films")
     #plt.show()
 
@@ -120,7 +120,7 @@ def data_exploration(data):
 
     f5 = plt.figure(5)
     plt.hist(np.transpose(MeanPerUser), bins=30)  # ,range=[1,5])#bins='auto',range=[1,5])
-    plt.xlabel("Mean over all Films")
+    plt.xlabel("Mean Rating over all Films")
     plt.ylabel("Number of Users")
 
     # Variance in Rating Per Film
