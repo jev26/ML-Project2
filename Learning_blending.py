@@ -65,7 +65,7 @@ print(prediction.shape)
 
 ## Blending function
 # test without CV
-print("learn blending wieghts")
+print("learn blending weights")
 
 y = pandas['Rating']
 X = np.transpose(prediction)

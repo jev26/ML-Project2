@@ -127,7 +127,7 @@ def data_exploration(data):
     StdPerUser = data.groupby('r').std()
 
     f6 = plt.figure(6)
-    plt.hist(np.transpose(StdPerFilm), bins=30)
+    plt.hist(np.transpose(StdPerUser), bins=30)
     plt.xlabel("Variance over all Films")
     plt.ylabel("Number of Users")
     # plt.show()
