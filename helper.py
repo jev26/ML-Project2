@@ -204,3 +204,32 @@ def create_submission_from_prediction(prediction, output_name):
     ids = transform(ids_txt)
     OUTPUT_PATH = output_name
     create_csv_submission(ids, y, OUTPUT_PATH)
+
+def prepareBlending(ratings, list_pred):
+    # determine position of given ratings
+    nonzero_row, nonzero_col = ratings.nonzero()
+    nonzero_train = list(zip(nonzero_row, nonzero_col))
+
+    prediction = []
+
+    for pred_id, pred in enumerate(list_pred):
+        #print(pred_id)
+
+        #print(pred.shape)
+
+        pred_tmp = []
+        for i in nonzero_train:
+            pred_tmp.append(pred.item(i))
+
+        #print(len(pred_tmp))  # (1176952)
+        # print(type(pred_tmp))
+
+        if pred_id == 0:
+            prediction = pred_tmp
+        else:
+            prediction = np.vstack((prediction, pred_tmp))
+
+        #print(len(prediction))
+        #print(type(prediction))
+
+    return prediction

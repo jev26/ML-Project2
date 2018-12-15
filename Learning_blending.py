@@ -9,6 +9,7 @@ from Visualization import cv_result
 #from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from crossval import *
+from simple_models import *
 
 data_name = "data/47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv"
 
@@ -17,51 +18,46 @@ ratings, pandas = load_data_sparse(data_name, False)
 print(pandas.shape) # (1176952, 3)
 
 stop_criterion = 1e-2
-prediction = []
+pred_lst = []
 
 ## Learning
 # in Learning_methods.py ==> aim to find the best parameter for each model
 # then the parameters are specified here to learn the best model for the final prediction
 
 ## Launch Final Models
+
 # SGD
 nb_feature = 20
 lambda_ = 0.004
-pred, _, _ = matrix_factorization_SGD_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
-
-#print(pred.shape) # (10000, 1000)
-#print(type(pred)) # <class 'numpy.ndarray'>
-
-# keep only prediction for tests
-nonzero_row, nonzero_col = ratings.nonzero()
-nonzero_train = list(zip(nonzero_row, nonzero_col))
-
-pred_tmp = []
-for i in nonzero_train:
-    pred_tmp.append(pred.item(i))
-
-print(len(pred_tmp)) # (1176952)
-print(type(pred_tmp))
-
-prediction = np.asarray(pred_tmp)
-print(type(prediction))
-print(prediction.shape)
+pred_SGD, _, _ = matrix_factorization_SGD_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+pred_lst.append(pred_SGD)
 
 # ALS
 nb_feature = 8
 lambda_ = 0.081
-pred, _, _ = ALS_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+pred_ALS, _, _ = ALS_CV(ratings, nb_feature, lambda_, lambda_, stop_criterion)
+pred_lst.append(pred_ALS)
 
-pred_tmp = []
-for i in nonzero_train:
-    pred_tmp.append(pred.item(i))
+# simple_models
+print("learn global mean")
+pred_globalmean =  global_mean(ratings, 0)
+print(pred_globalmean.shape)
+pred_lst.append(pred_globalmean)
 
-print(len(pred_tmp))  # (1176952)
+print("learn user mean")
+pred_usermean = user_mean(ratings, 0)
+print(pred_usermean.shape)
+pred_lst.append(pred_usermean)
 
-prediction = np.vstack((prediction,pred_tmp))
+print("learn item mean")
+pred_itemmean = baseline_item_mean(ratings, 0)
+print(pred_itemmean.shape)
+pred_lst.append(pred_itemmean)
 
-print(type(prediction))
-print(prediction.shape)
+# put all prediction into one matrix
+print("prediction matrix")
+prediction = prepareBlending(ratings, pred_lst)
+print(len(prediction))
 
 ## Blending function
 # test without CV
@@ -98,4 +94,6 @@ for k in range(k_fold):
 
 # two types of recommender systems
 # --> collaborative filtering"""
+
+
 
