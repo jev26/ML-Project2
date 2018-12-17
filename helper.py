@@ -146,17 +146,8 @@ def build_k_indices(train, k_fold):
 
     return np.array(k_indices)
 
+
 def create_submission_from_prediction(prediction, output_name):
-
-    def prediction_transformed(prediction, ids_process):
-        """ return the prediction transformed for the submission """
-        y = []
-        for i in range(len(ids_process)):
-            row = ids_process[i][0]
-            col = ids_process[i][1]
-            y.append(prediction[row - 1, col - 1])
-        return y
-
     def create_csv_submission(ids, y_pred, name):
         """
         Creates an output file in csv format for submission to kaggle
@@ -196,14 +187,15 @@ def create_submission_from_prediction(prediction, output_name):
     ids_txt = read_txt(DATA_TEST_PATH)[1:]
     ids_process = [deal_line(line) for line in ids_txt]
 
-    # prediction under the right format
-    y = prediction_transformed(prediction, ids_process)
+    y = np.vectorize(round)(prediction)
 
     y = np.rint(y)
 
     ids = transform(ids_txt)
     OUTPUT_PATH = output_name
     create_csv_submission(ids, y, OUTPUT_PATH)
+
+    
 
 def prepareBlending(ratings, list_pred):
     # determine position of given ratings
