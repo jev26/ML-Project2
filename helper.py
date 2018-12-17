@@ -195,7 +195,7 @@ def create_submission_from_prediction(prediction, output_name):
     OUTPUT_PATH = output_name
     create_csv_submission(ids, y, OUTPUT_PATH)
 
-    
+
 
 def prepareBlending(ratings, list_pred):
     # determine position of given ratings

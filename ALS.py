@@ -109,7 +109,7 @@ def update_item_feature(
     return prediction(user_features, item_features), rmse"""
 
 
-def ALS_CV(trainset, testset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
+def ALS_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
 
     train = testset_to_sparse_matrix(trainset.build_testset())
 
@@ -141,18 +141,17 @@ def ALS_CV(trainset, testset, finalpredset, num_features, lambda_user, lambda_fi
 
         # RMSE
         rmse = compute_error(train, user_features, item_features, nz_ratings2)
-        #print("RMSE: {}.".format(rmse))
+        print("RMSE: {}.".format(rmse))
 
         errors.append(rmse)
-    #print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
+    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
     errors.remove(5)
     errors.remove(4)
 
     pred = prediction(user_features, item_features)
 
-    test_usr_idx, test_movies_idx, _ = get_testset_indices(testset)
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
-    return pred[test_usr_idx, test_movies_idx], pred[finalpred_usr_idx, finalpred_movies_idx]
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
 def ALS_test_error_calculation(test, user_features, item_features):

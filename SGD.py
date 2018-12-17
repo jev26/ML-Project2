@@ -52,7 +52,7 @@ import time
 
     return prediction(user_features, film_features), rmse"""
 
-def matrix_factorization_SGD_CV(trainset, testset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
+def matrix_factorization_SGD_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
     train = testset_to_sparse_matrix(trainset.build_testset())
 
     # define parameters
@@ -85,6 +85,7 @@ def matrix_factorization_SGD_CV(trainset, testset, finalpredset, num_features, l
             film_features[:, d] += gamma * (error * user_features[:, n] - lambda_film * film_features[:, d])
 
         rmse = compute_error(train, user_features, film_features, np.array(nonzero_train).reshape((-1, 2)))
+        print("RMSE: {}.".format(rmse))
         errors.append(rmse)
 
     errors.remove(5)
@@ -94,9 +95,8 @@ def matrix_factorization_SGD_CV(trainset, testset, finalpredset, num_features, l
 
     pred = prediction(user_features, film_features)
 
-    test_usr_idx, test_movies_idx, _ = get_testset_indices(testset)
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
-    return pred[test_usr_idx, test_movies_idx], pred[finalpred_usr_idx, finalpred_movies_idx]
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 def SGD_test_error_calculation(test, user_features, film_features):
 
