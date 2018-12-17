@@ -1,6 +1,7 @@
 from helper import *
 import time
 from itertools import groupby
+from surprise_models import *
 
 
 #taken from course
@@ -108,7 +109,10 @@ def update_item_feature(
     return prediction(user_features, item_features), rmse"""
 
 
-def ALS_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
+def ALS_CV(trainset, testset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
+
+    train = testset_to_sparse_matrix(trainset.build_testset())
+
     #Alternating Least Squares (ALS) algorithm.
     # define parameters
     errors = [5, 4]  # record the rmse for each step
@@ -144,7 +148,11 @@ def ALS_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
     errors.remove(5)
     errors.remove(4)
 
-    return prediction(user_features, item_features), user_features, item_features
+    pred = prediction(user_features, item_features)
+
+    test_usr_idx, test_movies_idx, _ = get_testset_indices(testset)
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[test_usr_idx, test_movies_idx], pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
 def ALS_test_error_calculation(test, user_features, item_features):

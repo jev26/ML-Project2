@@ -3,6 +3,7 @@ import scipy
 import scipy.io
 import scipy.sparse as sp
 from helper import *
+from surprise_models import *
 import pandas as pd
 import time
 
@@ -51,7 +52,8 @@ import time
 
     return prediction(user_features, film_features), rmse"""
 
-def matrix_factorization_SGD_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
+def matrix_factorization_SGD_CV(trainset, testset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
+    train = testset_to_sparse_matrix(trainset.build_testset())
 
     # define parameters
     errors = [5, 4]
@@ -90,8 +92,11 @@ def matrix_factorization_SGD_CV(train, num_features, lambda_user, lambda_film, s
 
     #rmse = SGD_test_error_calculation(test, user_features, film_features)
 
-    return prediction(user_features, film_features), user_features, film_features
+    pred = prediction(user_features, film_features)
 
+    test_usr_idx, test_movies_idx, _ = get_testset_indices(testset)
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[test_usr_idx, test_movies_idx], pred[finalpred_usr_idx, finalpred_movies_idx]
 
 def SGD_test_error_calculation(test, user_features, film_features):
 
