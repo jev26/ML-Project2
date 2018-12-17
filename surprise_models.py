@@ -25,6 +25,8 @@ def spr_estimate_to_vect(predict):
     for i, pred in enumerate(predict):
         vect[i] = pred.est
 
+    return vect
+
 
 def surprise_SVD(trainset, testset, finalset):
     algo = spr.SVD(n_factors=80, n_epochs=40, lr_bu=0.01, lr_bi=0.01, lr_pu=0.1, lr_qi=0.1, reg_bu=0.05, reg_bi=0.05, reg_pu=0.09, reg_qi=0.1)
