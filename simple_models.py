@@ -1,22 +1,31 @@
 import numpy as np
+from surprise_models import testset_to_sparse_matrix, get_testset_indices
 
-def global_mean(train, test):
-    """baseline method: use the global mean."""
+def global_mean(trainset, finalpredset):
+
+    train = testset_to_sparse_matrix(trainset.build_testset())
+
     # find the non zero ratings in the train
     nonzero_train = train[train.nonzero()]
 
     # calculate the global mean
     global_mean_train = nonzero_train.mean()
 
-    return np.full(train.shape, global_mean_train)
+    pred = np.full(train.shape, global_mean_train)
+
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
 
 
-def user_mean(train, test):
-    """baseline method: use the user means as the prediction."""
+def user_mean(trainset, finalpredset):
+    """use the user means as the prediction."""
+
+    train = testset_to_sparse_matrix(trainset.build_testset())
+
     num_items, num_users = train.shape
-    predictions = np.zeros(train.shape)
+    pred = np.zeros(train.shape)
 
     for user_index in range(num_users):
         # find the non-zero ratings for each user in the training dataset
@@ -26,14 +35,18 @@ def user_mean(train, test):
         # calculate the mean if the number of elements is not 0
         if nonzeros_train_ratings.shape[0] != 0:
             user_train_mean = nonzeros_train_ratings.mean()
-            predictions[:, user_index] = user_train_mean
+            pred[:, user_index] = user_train_mean
 
-    return predictions
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
 
-def baseline_item_mean(train, test):
+def item_mean(trainset, finalpredset):
     """baseline method: use item means as the prediction."""
+
+    train = testset_to_sparse_matrix(trainset.build_testset())
+
     num_items, num_users = train.shape
-    predictions = np.zeros(train.shape)
+    pred = np.zeros(train.shape)
 
     for item_index in range(num_items):
         # find the non-zero ratings for each item in the training dataset
@@ -43,6 +56,7 @@ def baseline_item_mean(train, test):
         # calculate the mean if the number of elements is not 0
         if nonzeros_train_ratings.shape[0] != 0:
             item_train_mean = nonzeros_train_ratings.mean()
-            predictions[item_index, :] = item_train_mean
+            pred[item_index, :] = item_train_mean
 
-    return predictions
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
