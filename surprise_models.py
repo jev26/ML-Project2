@@ -69,13 +69,7 @@ def surprise_slopeOne(trainset, finalset):
 
 def surprise_SVDpp(trainset, finalset):
 
-    options = {'method': 'als',
-               'reg_i': 1.e-5,
-               'reg_u': 14.6,
-               'n_epochs': 10
-               }
-
-    algo = spr.SVDpp(n_factors=40, n_epochs=20, lr_all=0.001, reg_all=0.05, bsl_options=options)
+    algo = spr.SVDpp(n_factors=40, n_epochs=20, lr_all=0.001, reg_all=0.05)
 
     algo.fit(trainset)
     predictions_final = algo.test(finalset)
