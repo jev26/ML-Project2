@@ -8,7 +8,7 @@ def pandas_to_surprise(data, pred=False):
     data_spr = spr.Dataset.load_from_df(data[['User', 'Movie', 'Rating']], reader)
     if pred:
         data_spr = data_spr.build_full_trainset().build_testset()
-        data_spr = np.sorted(data_spr, key=lambda x: (x[1], x[0]))
+        data_spr = sorted(data_spr, key=lambda x: (x[1], x[0]))
     return data_spr
 
 def get_testset_indices(test_spr):
