@@ -30,7 +30,7 @@ def spr_estimate_to_vect(predict):
 
 
 def surprise_SVD(trainset, finalset):
-    algo = spr.SVD(n_factors=40, n_epochs=20, lr_all=0.001, reg_all=0.05)
+    algo = spr.SVD(n_factors=40, n_epochs=20, lr_all=0.001)
 
     algo.fit(trainset)
     predictions_final = algo.test(finalset)
@@ -69,7 +69,7 @@ def surprise_slopeOne(trainset, finalset):
 
 def surprise_SVDpp(trainset, finalset):
 
-    algo = spr.SVDpp(n_factors=40, n_epochs=20, lr_all=0.001, reg_all=0.05)
+    algo = spr.SVDpp(n_factors=40, n_epochs=20, lr_all=0.001)
 
     algo.fit(trainset)
     predictions_final = algo.test(finalset)
