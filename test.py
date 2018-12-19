@@ -4,18 +4,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def load_data_sparse(path_dataset, exploration = True):
-
+    """
+    read the file corresponding to path_dataset
+    if exploration is True, then make histograms
+    return a sparse matrix with the ratings
+    plus a pandas dataframe vector containing Rating, User Id and Movie Id
+    """
+    # read the file
     data = pd.read_csv(path_dataset)
-    #print(data.head(10))
 
+    # break the string to obtain both the row and the column index
     data['r'] = data.Id.str.split('_').str.get(0).str[1:]
     data['c'] = data.Id.str.split('_').str.get(1).str[1:]
 
     if exploration: data_exploration(data)
 
+    # in the file the index start at 1
+    # make it start at 0
     data['r'] = data['r'].apply(lambda l: int(l) - 1)
     data['c'] = data['c'].apply(lambda l: int(l) - 1)
 
+    # create
     # row indices
     row_ind = np.array(data['r'], dtype=int)
     # column indices
@@ -28,22 +37,10 @@ def load_data_sparse(path_dataset, exploration = True):
 
     # create COO sparse matrix from three arrays
     mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
-    #print(mat_coo.shape)
-
     mat_lil = mat_coo.tolil()
-    #print(mat_lil.shape)
-
-    # change panda frame
-    #df = pd.DataFrame(np.zeros((NbrMovie,NbrUser)))
-
-    #for i in range(data.shape[0]):
-    #    df[row_ind[i],col_ind[i]] = ratings[i]
 
     data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
     data = data.drop(['Id'], axis = 1)
-
-    #print(data.shape)
-    #print(data.head(0))
 
     return mat_lil, data
 

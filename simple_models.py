@@ -17,8 +17,6 @@ def global_mean(trainset, finalpredset):
     return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
-
-
 def user_mean(trainset, finalpredset):
     """use the user means as the prediction."""
 
@@ -39,6 +37,7 @@ def user_mean(trainset, finalpredset):
 
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
     return pred[finalpred_usr_idx, finalpred_movies_idx]
+
 
 def item_mean(trainset, finalpredset):
     """baseline method: use item means as the prediction."""
@@ -78,8 +77,6 @@ def global_median(trainset, finalpredset):
     return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
-
-
 def user_median(trainset, finalpredset):
     """use the user means as the prediction."""
 
@@ -100,6 +97,7 @@ def user_median(trainset, finalpredset):
 
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
     return pred[finalpred_usr_idx, finalpred_movies_idx]
+
 
 def item_median(trainset, finalpredset):
     """baseline method: use item means as the prediction."""
