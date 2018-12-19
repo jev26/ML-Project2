@@ -6,6 +6,9 @@ import csv
 import pickle
 import pandas as pd
 
+def calculate_rmse(real_labels, predictions):
+    """Calculate RMSE."""
+    return np.linalg.norm(real_labels - predictions) / np.sqrt(len(real_labels))
 
 def prediction(user_features,item_features):
     """ compute the inner product of the 2 matrices"""
@@ -21,7 +24,6 @@ def compute_error(data, user_features, item_features, nonzero):
     return np.sqrt(1.0 * mse / len(nonzero))
 
 def split_data_for_CV(ratings, min_num_ratings, p_test=0.1):
-
     """split the ratings to training data and test data.
     Args:
         min_num_ratings:

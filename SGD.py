@@ -48,8 +48,6 @@ def matrix_factorization_SGD_CV(trainset, finalpredset, num_features, lambda_use
     errors.remove(5)
     errors.remove(4)
 
-    #rmse = SGD_test_error_calculation(test, user_features, film_features)
-
     pred = prediction(user_features, film_features)
 
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)

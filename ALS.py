@@ -118,7 +118,6 @@ def ALS_test_error_calculation(test, user_features, item_features):
     nonzero_row, nonzero_col = test.nonzero()
     nonzero_test = list(zip(nonzero_row, nonzero_col))
 
-    #nz_ratings_te, nz_item_userindices_te, nz_user_itemindices_te = build_index_groups(test)
     nz_ratings_te, _, _ = build_index_groups(test)
 
     rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))

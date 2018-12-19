@@ -2,6 +2,7 @@ import surprise as spr
 import scipy.sparse as sp
 import numpy as np
 
+## Helpter functions to use surprise library
 
 def pandas_to_surprise(data, pred=False):
     reader = spr.Reader(rating_scale=(1, 5))
@@ -21,13 +22,13 @@ def testset_to_sparse_matrix(test_spr):
     matrix[users_idx, movies_idx] = labels
     return matrix
 
-
 def spr_estimate_to_vect(predict):
     vect = np.zeros(len(predict))
     for i, pred in enumerate(predict):
         vect[i] = pred.est
     return vect
 
+## Function running the suprise's models
 
 def surprise_SVD(trainset, finalset):
     algo = spr.SVD(n_factors=40, n_epochs=20, lr_all=0.001)
@@ -36,7 +37,6 @@ def surprise_SVD(trainset, finalset):
     predictions_final = algo.test(finalset)
 
     return spr_estimate_to_vect(predictions_final)
-
 
 def surprise_basicKNN(trainset, finalset):
     algo = spr.KNNBasic()
@@ -57,7 +57,6 @@ def surprise_baselineKNN(trainset, finalset):
 
     return spr_estimate_to_vect(predictions_final)
 
-
 def surprise_slopeOne(trainset, finalset):
     algo = spr.SlopeOne()
 
@@ -65,7 +64,6 @@ def surprise_slopeOne(trainset, finalset):
     predictions_final = algo.test(finalset)
 
     return spr_estimate_to_vect(predictions_final)
-
 
 def surprise_SVDpp(trainset, finalset):
 
