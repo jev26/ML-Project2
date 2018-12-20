@@ -69,9 +69,12 @@ def data_exploration(data):
 
     plt.show()
 
+    #if we want to save figures
+    """
     f1.savefig('Figures/NbrRatePerUser.png')
     f2.savefig('Figures/NbrRatePerFilm.png')
     f3.savefig('Figures/FilmMean.png')
     f4.savefig('Figures/FilmVariance.png')
     f5.savefig('Figures/UserMean.png')
     f6.savefig('Figures/UserVariance.png')
+    """
