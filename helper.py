@@ -5,6 +5,9 @@ import scipy as sp
 import csv
 import pickle
 import pandas as pd
+import itertools # for feature expansion
+from scipy import sparse
+from data_exploration import *
 
 def calculate_rmse(real_labels, predictions):
     """Calculate RMSE."""
@@ -96,6 +99,72 @@ def build_k_indices(train, k_fold):
 
     return np.array(k_indices)
 
+def polynomial_features(X, degree):
+    """polynomial feature function that create a new features matrix with all combinations
+    of features with degree less than or equal to the degree"""
+    #get the number of samples and features from the X matrix
+    nb_samples, nb_features = X.shape
+
+    #create an iterator that lets us iterate over all combinations of numbers from 0 to nb_features-1
+    combi = itertools.chain.from_iterable(
+        itertools.combinations_with_replacement(range(nb_features), i) for i in range(degree + 1))
+
+    #use that iterator to get the total number of features of the output
+    nb_output = sum(1 for _ in combi)
+
+    #initiate an empty array for the output
+    PF = np.empty([nb_samples, nb_output])
+
+    #instantiate the iterator again
+    combi = itertools.chain.from_iterable(
+        itertools.combinations_with_replacement(range(nb_features), i) for i in range(degree + 1))
+
+    #create the polynomial features by iterating and multipliying the columns
+    for a, b in enumerate(combi):
+        PF[:, a] = X[:, b].prod(1)
+
+    return PF
+
+def load_data_sparse(path_dataset, exploration = True):
+    """
+    read the file corresponding to path_dataset
+    if exploration is True, then make histograms
+    return a sparse matrix with the ratings
+    plus a pandas dataframe vector containing Rating, User Id and Movie Id
+    """
+    # read the file
+    data = pd.read_csv(path_dataset)
+
+    # break the string to obtain both the row and the column index
+    data['r'] = data.Id.str.split('_').str.get(0).str[1:]
+    data['c'] = data.Id.str.split('_').str.get(1).str[1:]
+
+    if exploration: data_exploration(data)
+
+    # in the file the index start at 1
+    # make it start at 0
+    data['r'] = data['r'].apply(lambda l: int(l) - 1)
+    data['c'] = data['c'].apply(lambda l: int(l) - 1)
+
+    # create
+    # row indices
+    row_ind = np.array(data['r'], dtype=int)
+    # column indices
+    col_ind = np.array(data['c'], dtype=int)
+    # data to be stored in COO sparse matrix
+    ratings = np.array(data['Prediction'], dtype=int)
+
+    NbrMovie = int(data['r'].max()) + 1
+    NbrUser = int(data['c'].max()) + 1
+
+    # create COO sparse matrix from three arrays
+    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
+    mat_lil = mat_coo.tolil()
+
+    data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
+    data = data.drop(['Id'], axis = 1)
+
+    return mat_lil, data
 
 def create_submission_from_prediction(prediction, output_name):
 

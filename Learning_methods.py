@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from helper import *
 import scipy.sparse as sp
-from test import load_data_sparse
+from data_exploration import load_data_sparse
 from CV import cross_validation
 from Visualization import cv_result
 

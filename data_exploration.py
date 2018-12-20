@@ -1,48 +1,6 @@
 import pandas as pd
-from scipy import sparse
 import numpy as np
 import matplotlib.pyplot as plt
-
-def load_data_sparse(path_dataset, exploration = True):
-    """
-    read the file corresponding to path_dataset
-    if exploration is True, then make histograms
-    return a sparse matrix with the ratings
-    plus a pandas dataframe vector containing Rating, User Id and Movie Id
-    """
-    # read the file
-    data = pd.read_csv(path_dataset)
-
-    # break the string to obtain both the row and the column index
-    data['r'] = data.Id.str.split('_').str.get(0).str[1:]
-    data['c'] = data.Id.str.split('_').str.get(1).str[1:]
-
-    if exploration: data_exploration(data)
-
-    # in the file the index start at 1
-    # make it start at 0
-    data['r'] = data['r'].apply(lambda l: int(l) - 1)
-    data['c'] = data['c'].apply(lambda l: int(l) - 1)
-
-    # create
-    # row indices
-    row_ind = np.array(data['r'], dtype=int)
-    # column indices
-    col_ind = np.array(data['c'], dtype=int)
-    # data to be stored in COO sparse matrix
-    ratings = np.array(data['Prediction'], dtype=int)
-
-    NbrMovie = int(data['r'].max()) + 1
-    NbrUser = int(data['c'].max()) + 1
-
-    # create COO sparse matrix from three arrays
-    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
-    mat_lil = mat_coo.tolil()
-
-    data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
-    data = data.drop(['Id'], axis = 1)
-
-    return mat_lil, data
 
 def data_exploration(data):
     # 10'000 users and 1'000 films
