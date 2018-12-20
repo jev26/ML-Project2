@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 def data_exploration(data):
+    """Function for data exploration"""
     # 10'000 users and 1'000 films
 
     # Nbr Rate Per User
