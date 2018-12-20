@@ -27,7 +27,7 @@ All these librairies should be installed in order for the code to run:
 
 * Download the dataset from the [crowdAI challenge](https://www.crowdai.org/challenges/epfl-ml-recommender-system/dataset_files) website and place them in the `data\` folder.
 Create one if it is not present. 
-**Important: ** The sample submission file should be renamed as `sampleSubmission.csv`
+**Important:** The sample submission file should be renamed as `sampleSubmission.csv`
 
 
 
