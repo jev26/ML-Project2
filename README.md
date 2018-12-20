@@ -6,7 +6,7 @@ We are supposed to predict good recommendations, e.g. of movies to users. All ra
 
 The code is written in Python and run on Jupyter notebooks
 
-**RMSE on crowdAI: ** 1.016
+**RMSE on crowdAI: 1.016**
 
 ## Team members
 
