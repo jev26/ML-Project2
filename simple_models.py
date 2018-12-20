@@ -2,7 +2,7 @@ import numpy as np
 from surprise_models import testset_to_sparse_matrix, get_testset_indices
 
 def global_mean(trainset, finalpredset):
-
+    """Model that gives the global mean as the prediction"""
     train = testset_to_sparse_matrix(trainset.build_testset())
 
     # find the non zero ratings in the train
@@ -18,7 +18,7 @@ def global_mean(trainset, finalpredset):
 
 
 def user_mean(trainset, finalpredset):
-    """use the user means as the prediction."""
+    """Model that gives the user means as the prediction."""
 
     train = testset_to_sparse_matrix(trainset.build_testset())
 
@@ -40,7 +40,7 @@ def user_mean(trainset, finalpredset):
 
 
 def item_mean(trainset, finalpredset):
-    """baseline method: use item means as the prediction."""
+    """Model that gives the item means as the prediction."""
 
     train = testset_to_sparse_matrix(trainset.build_testset())
 
@@ -62,13 +62,13 @@ def item_mean(trainset, finalpredset):
 
 
 def global_median(trainset, finalpredset):
-
+    """Model that gives the global median as the prediction"""
     train = testset_to_sparse_matrix(trainset.build_testset())
 
     # find the non zero ratings in the train
     nonzero_train = train[train.nonzero()]
 
-    # calculate the global mean
+    # calculate the global median
     global_median_train = np.median(nonzero_train.toarray())
 
     pred = np.full(train.shape, global_median_train)
@@ -78,7 +78,7 @@ def global_median(trainset, finalpredset):
 
 
 def user_median(trainset, finalpredset):
-    """use the user means as the prediction."""
+    """Model that gives the user median as the prediction"""
 
     train = testset_to_sparse_matrix(trainset.build_testset())
 
@@ -90,7 +90,7 @@ def user_median(trainset, finalpredset):
         train_ratings = train[:, user_index]
         nonzeros_train_ratings = train_ratings[train_ratings.nonzero()]
 
-        # calculate the mean if the number of elements is not 0
+        # calculate the median if the number of elements is not 0
         if nonzeros_train_ratings.shape[0] != 0:
             user_train_median = np.median(nonzeros_train_ratings.toarray())
             pred[:, user_index] = user_train_median
@@ -100,7 +100,7 @@ def user_median(trainset, finalpredset):
 
 
 def item_median(trainset, finalpredset):
-    """baseline method: use item means as the prediction."""
+    """Model that gives the item medians as the prediction."""
 
     train = testset_to_sparse_matrix(trainset.build_testset())
 
@@ -112,7 +112,7 @@ def item_median(trainset, finalpredset):
         train_ratings = train[item_index, :]
         nonzeros_train_ratings = train_ratings[train_ratings.nonzero()]
 
-        # calculate the mean if the number of elements is not 0
+        # calculate the median if the number of elements is not 0
         if nonzeros_train_ratings.shape[0] != 0:
             item_train_median = np.median(nonzeros_train_ratings.toarray())
             pred[item_index, :] = item_train_median
