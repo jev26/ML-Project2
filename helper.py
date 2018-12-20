@@ -1,10 +1,5 @@
 """ Basic functions to use input and produce output format"""
-import numpy as np
-import matplotlib.pyplot as plt
 import scipy as sp
-import csv
-import pickle
-import pandas as pd
 import itertools # for feature expansion
 from scipy import sparse
 from data_exploration import *
@@ -167,7 +162,7 @@ def load_data_sparse(path_dataset, exploration = True):
     return mat_lil, data
 
 def create_submission_from_prediction(prediction, output_name):
-
+    "Create a csv submission file given the prediction and the name of the file"
     def round(x):
         if (x < 1):
             return 1

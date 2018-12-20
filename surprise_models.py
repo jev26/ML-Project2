@@ -85,7 +85,7 @@ def surprise_SVDpp(trainset, finalset):
 
 def surprise_baseline(trainset, finalset):
     "baseline model"
-    
+
     algo = spr.BaselineOnly()
 
     algo.fit(trainset)
