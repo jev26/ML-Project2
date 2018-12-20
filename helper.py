@@ -3,6 +3,7 @@ import scipy as sp
 import itertools # for feature expansion
 from scipy import sparse
 from data_exploration import *
+import pandas as pd
 
 def calculate_rmse(real_labels, predictions):
     """Calculate RMSE."""
