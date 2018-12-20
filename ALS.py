@@ -1,5 +1,4 @@
 from helper import *
-import time
 from itertools import groupby
 from surprise_models import *
 
@@ -80,7 +79,7 @@ def ALS_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_
     np.random.seed(988)
 
     # init ALS
-    user_features, item_features = init_MF(train, num_features)
+    user_features, film_features = init_MF(train, num_features)
 
     nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(train)
     nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
@@ -92,13 +91,13 @@ def ALS_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_
     while ((errors[-2] - errors[-1]) > stop_criterion):
         iter += 1
 
-        user_features = update_user_feature(train, item_features, lambda_user, nnz_items_per_user,
+        user_features = update_user_feature(train, film_features, lambda_user, nnz_items_per_user,
                                             nz_user_itemindices)
-        item_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
+        film_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
                                             nz_item_userindices)
 
         # RMSE
-        rmse = compute_error(train, user_features, item_features, nz_ratings2)
+        rmse = compute_error(train, user_features, film_features, nz_ratings2)
         print("RMSE: {}.".format(rmse))
 
         errors.append(rmse)
@@ -106,7 +105,7 @@ def ALS_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_
     errors.remove(5)
     errors.remove(4)
 
-    pred = prediction(user_features, item_features)
+    pred = prediction(user_features, film_features)
 
     finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
     return pred[finalpred_usr_idx, finalpred_movies_idx]
