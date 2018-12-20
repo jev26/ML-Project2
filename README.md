@@ -42,8 +42,8 @@ Create one if it is not present.
 ## Description of folder and files
 
 * The `data/` folder contains the training data `47b05e70-6076-44e8-96da-2530dc2187de_data_train.csv` and the dummy submission `sampleSubmission.csv`
-* The `models` folders contains all the predictions for a testset and trained on a 90/10 split. That folder also contains the splitted trainset, testset and corresponding labels.
-* The `models_final` folders contains all the predictions for crowdAI for each model and trained on the full dataset.
+* The `models/` folders contains all the predictions for a testset and trained on a 90/10 split. That folder also contains the splitted trainset, testset and corresponding labels.
+* The `models_final/` folders contains all the predictions for crowdAI for each model and trained on the full dataset.
 * `run.ipynb` contains the jupyter notebook that generates the submission file.
 * `ALS.py` contains the implementation of the Alternating Least Squares model
 * `CV.py` contains a cross-validation function for the ALS and the SGD
