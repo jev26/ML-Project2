@@ -1,6 +1,6 @@
 from helper import *
-import time
 from itertools import groupby
+from surprise_models import *
 
 
 #taken from course
@@ -65,7 +65,11 @@ def update_item_feature(
 
     return item_features
 
-"""def ALS_CV(train, test, num_features, lambda_user, lambda_film, stop_criterion):
+
+def ALS_CV(trainset, finalpredset, num_features, lambda_user, lambda_film, stop_criterion):
+
+    train = testset_to_sparse_matrix(trainset.build_testset())
+
     #Alternating Least Squares (ALS) algorithm.
     # define parameters
     errors = [5, 4]  # record the rmse for each step
@@ -75,50 +79,7 @@ def update_item_feature(
     np.random.seed(988)
 
     # init ALS
-    user_features, item_features = init_MF(train, num_features)
-
-    nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(train)
-    nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
-    nnz_items_per_user = [len(array) for user, array in nz_user_itemindices]
-    nz_ratings2 = np.array(nz_ratings).reshape((-1, 2))
-
-    nz_ratings_te, nz_item_userindices_te, nz_user_itemindices_te = build_index_groups(test)
-
-    # start of the ALS-WR algorithm.
-    print("learn the matrix factorization using ALS...")
-    while ((errors[-2] - errors[-1]) > stop_criterion):
-        iter += 1
-
-        user_features = update_user_feature(train, item_features, lambda_user, nnz_items_per_user,
-                                            nz_user_itemindices)
-        item_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
-                                            nz_item_userindices)
-
-        # RMSE
-        rmse = compute_error(train, user_features, item_features, nz_ratings2)
-        #print("RMSE: {}.".format(rmse))
-
-        errors.append(rmse)
-    #print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
-    errors.remove(5)
-    errors.remove(4)
-
-    rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))
-    print("RMSE on test data: {}.".format(rmse))
-    return prediction(user_features, item_features), rmse"""
-
-
-def ALS_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
-    #Alternating Least Squares (ALS) algorithm.
-    # define parameters
-    errors = [5, 4]  # record the rmse for each step
-    iter = 0
-
-    # set seed
-    np.random.seed(988)
-
-    # init ALS
-    user_features, item_features = init_MF(train, num_features)
+    user_features, film_features = init_MF(train, num_features)
 
     nz_ratings, nz_item_userindices, nz_user_itemindices = build_index_groups(train)
     nnz_users_per_item = [len(array) for user, array in nz_item_userindices]
@@ -130,21 +91,24 @@ def ALS_CV(train, num_features, lambda_user, lambda_film, stop_criterion):
     while ((errors[-2] - errors[-1]) > stop_criterion):
         iter += 1
 
-        user_features = update_user_feature(train, item_features, lambda_user, nnz_items_per_user,
+        user_features = update_user_feature(train, film_features, lambda_user, nnz_items_per_user,
                                             nz_user_itemindices)
-        item_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
+        film_features = update_item_feature(train, user_features, lambda_film, nnz_users_per_item,
                                             nz_item_userindices)
 
         # RMSE
-        rmse = compute_error(train, user_features, item_features, nz_ratings2)
-        #print("RMSE: {}.".format(rmse))
+        rmse = compute_error(train, user_features, film_features, nz_ratings2)
+        print("RMSE: {}.".format(rmse))
 
         errors.append(rmse)
-    #print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
+    print("Iteration stopped, as iteration criterion {} was reached. RMSE = {}".format(stop_criterion, errors[-1]))
     errors.remove(5)
     errors.remove(4)
 
-    return prediction(user_features, item_features), user_features, item_features
+    pred = prediction(user_features, film_features)
+
+    finalpred_usr_idx, finalpred_movies_idx, _ = get_testset_indices(finalpredset)
+    return pred[finalpred_usr_idx, finalpred_movies_idx]
 
 
 def ALS_test_error_calculation(test, user_features, item_features):
@@ -153,7 +117,6 @@ def ALS_test_error_calculation(test, user_features, item_features):
     nonzero_row, nonzero_col = test.nonzero()
     nonzero_test = list(zip(nonzero_row, nonzero_col))
 
-    #nz_ratings_te, nz_item_userindices_te, nz_user_itemindices_te = build_index_groups(test)
     nz_ratings_te, _, _ = build_index_groups(test)
 
     rmse = compute_error(test, user_features, item_features, np.array(nz_ratings_te).reshape((-1, 2)))

@@ -6,17 +6,13 @@ from ALS import *
 
 def cross_validation(SGDModel,ratings, k_fold ,nb_features ,lambdas ,min_nb_ratings ,p_test, stop_criterion):
 
-
     train, test = split_data_for_CV(ratings, min_nb_ratings, p_test)
     k_indices = build_k_indices(train, k_fold)
 
     errors = np.zeros((nb_features.size,lambdas.size))
-    #errors = np.zeros((len(nb_features), lambdas.size))
 
     # Cross-validation
-    #for nb_feature in nb_features[:]:
     for counter_feature, nb_feature in enumerate(nb_features):
-        #for lambda_ in lambdas[:]:
         for counter_lambda, lambda_ in enumerate(lambdas):
             errors_tmp = []
             for k in range(k_fold):
@@ -40,4 +36,3 @@ def cross_validation(SGDModel,ratings, k_fold ,nb_features ,lambdas ,min_nb_rati
             errors[counter_feature, counter_lambda] = np.mean(errors_tmp)
 
     return errors
-    # put plot

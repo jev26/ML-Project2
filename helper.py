@@ -1,64 +1,14 @@
 """ Basic functions to use input and produce output format"""
-import numpy as np
-import matplotlib.pyplot as plt
 import scipy as sp
-import csv
+import itertools # for feature expansion
+from scipy import sparse
+from data_exploration import *
+import pandas as pd
 
+def calculate_rmse(real_labels, predictions):
+    """Calculate RMSE."""
+    return np.linalg.norm(real_labels - predictions) / np.sqrt(len(real_labels))
 
-def read_txt(path):
-    """read text file from path."""
-    with open(path, "r") as f:
-        return f.read().splitlines()
-
-
-def load_csv_data(path_dataset):
-    """Load data in text format, one rating per line, as in the kaggle competition."""
-    data = read_txt(path_dataset)[1:]
-    return preprocess_data(data)
-
-def deal_line(line):
-    pos, rating = line.split(',')
-    row, col = pos.split("_")
-    row = row.replace("r", "")
-    col = col.replace("c", "")
-    return int(row), int(col), float(rating)
-
-def preprocess_data(data):
-    """preprocessing the text data, conversion to numerical array format."""
-
-    def statistics(data):
-        row = set([line[0] for line in data])
-        col = set([line[1] for line in data])
-        return min(row), max(row), min(col), max(col)
-
-    # parse each line
-    data = [deal_line(line) for line in data]
-
-    # do statistics on the dataset.
-    min_row, max_row, min_col, max_col = statistics(data)
-    print("number of items: {}, number of users: {}".format(max_row, max_col))
-
-    # build rating matrix.
-    ratings = sp.lil_matrix((max_row, max_col))
-    for row, col, rating in data:
-        ratings[row - 1, col - 1] = rating
-    return ratings
-"""
-def asfptype(self):
-    
-
-    fp_types = ['f', 'd', 'F', 'D']
-
-    if self.dtype.char in fp_types:
-        return self
-    else:
-        for fp_type in fp_types:
-            if self.dtype <= np.dtype(fp_type):
-                return self.astype(fp_type)
-
-        raise TypeError('cannot upcast [%s] to a floating '
-                        'point format' % self.dtype.name)
-"""
 def prediction(user_features,item_features):
     """ compute the inner product of the 2 matrices"""
     return item_features.T.dot(user_features)
@@ -73,7 +23,6 @@ def compute_error(data, user_features, item_features, nonzero):
     return np.sqrt(1.0 * mse / len(nonzero))
 
 def split_data_for_CV(ratings, min_num_ratings, p_test=0.1):
-
     """split the ratings to training data and test data.
     Args:
         min_num_ratings:
@@ -146,31 +95,75 @@ def build_k_indices(train, k_fold):
 
     return np.array(k_indices)
 
+def polynomial_features(X, degree):
+    """polynomial feature function that create a new features matrix with all combinations
+    of features with degree less than or equal to the degree"""
+    #get the number of samples and features from the X matrix
+    nb_samples, nb_features = X.shape
+
+    #create an iterator that lets us iterate over all combinations of numbers from 0 to nb_features-1
+    combi = itertools.chain.from_iterable(
+        itertools.combinations_with_replacement(range(nb_features), i) for i in range(degree + 1))
+
+    #use that iterator to get the total number of features of the output
+    nb_output = sum(1 for _ in combi)
+
+    #initiate an empty array for the output
+    PF = np.empty([nb_samples, nb_output])
+
+    #instantiate the iterator again
+    combi = itertools.chain.from_iterable(
+        itertools.combinations_with_replacement(range(nb_features), i) for i in range(degree + 1))
+
+    #create the polynomial features by iterating and multipliying the columns
+    for a, b in enumerate(combi):
+        PF[:, a] = X[:, b].prod(1)
+
+    return PF
+
+def load_data_sparse(path_dataset, exploration = True):
+    """
+    read the file corresponding to path_dataset
+    if exploration is True, then make histograms
+    return a sparse matrix with the ratings
+    plus a pandas dataframe vector containing Rating, User Id and Movie Id
+    """
+    # read the file
+    data = pd.read_csv(path_dataset)
+
+    # break the string to obtain both the row and the column index
+    data['r'] = data.Id.str.split('_').str.get(0).str[1:]
+    data['c'] = data.Id.str.split('_').str.get(1).str[1:]
+
+    if exploration: data_exploration(data)
+
+    # in the file the index start at 1
+    # make it start at 0
+    data['r'] = data['r'].apply(lambda l: int(l) - 1)
+    data['c'] = data['c'].apply(lambda l: int(l) - 1)
+
+    # create
+    # row indices
+    row_ind = np.array(data['r'], dtype=int)
+    # column indices
+    col_ind = np.array(data['c'], dtype=int)
+    # data to be stored in COO sparse matrix
+    ratings = np.array(data['Prediction'], dtype=int)
+
+    NbrMovie = int(data['r'].max()) + 1
+    NbrUser = int(data['c'].max()) + 1
+
+    # create COO sparse matrix from three arrays
+    mat_coo = sparse.coo_matrix((ratings, (row_ind, col_ind)), shape=(NbrMovie,NbrUser))
+    mat_lil = mat_coo.tolil()
+
+    data = data.rename(index=str, columns={"Prediction": "Rating", "r": "User", "c": "Movie"})
+    data = data.drop(['Id'], axis = 1)
+
+    return mat_lil, data
+
 def create_submission_from_prediction(prediction, output_name):
-
-    def prediction_transformed(prediction, ids_process):
-        """ return the prediction transformed for the submission """
-        y = []
-        for i in range(len(ids_process)):
-            row = ids_process[i][0]
-            col = ids_process[i][1]
-            y.append(prediction[row - 1, col - 1])
-        return y
-
-    def create_csv_submission(ids, y_pred, name):
-        """
-        Creates an output file in csv format for submission to kaggle
-        Arguments: ids (event ids associated with each prediction)
-                   y_pred (predicted class labels)
-                   name (string name of .csv output file to be created)
-        """
-        with open(name, 'w') as csvfile:
-            fieldnames = ['Id', 'Prediction']
-            writer = csv.DictWriter(csvfile, delimiter=",", fieldnames=fieldnames)
-            writer.writeheader()
-            for r1, r2 in zip(ids, y_pred):
-                writer.writerow({'Id': str(r1), 'Prediction': float(r2)})
-
+    "Create a csv submission file given the prediction and the name of the file"
     def round(x):
         if (x < 1):
             return 1
@@ -179,57 +172,9 @@ def create_submission_from_prediction(prediction, output_name):
         else:
             return x
 
-    def transform(ids_txt):
-        """ split the text index"""
-
-        def deal_line(line):
-            pos, rating = line.split(',')
-            return str(pos)
-
-        ids = [deal_line(line) for line in ids_txt]
-        return ids
-
-    prediction = np.vectorize(round)(prediction)
-
     DATA_TEST_PATH = 'data/sampleSubmission.csv'
+    data = pd.read_csv(DATA_TEST_PATH)
 
-    ids_txt = read_txt(DATA_TEST_PATH)[1:]
-    ids_process = [deal_line(line) for line in ids_txt]
-
-    # prediction under the right format
-    y = prediction_transformed(prediction, ids_process)
-
-    y = np.rint(y)
-
-    ids = transform(ids_txt)
-    OUTPUT_PATH = output_name
-    create_csv_submission(ids, y, OUTPUT_PATH)
-
-def prepareBlending(ratings, list_pred):
-    # determine position of given ratings
-    nonzero_row, nonzero_col = ratings.nonzero()
-    nonzero_train = list(zip(nonzero_row, nonzero_col))
-
-    prediction = []
-
-    for pred_id, pred in enumerate(list_pred):
-        #print(pred_id)
-
-        #print(pred.shape)
-
-        pred_tmp = []
-        for i in nonzero_train:
-            pred_tmp.append(pred.item(i))
-
-        #print(len(pred_tmp))  # (1176952)
-        # print(type(pred_tmp))
-
-        if pred_id == 0:
-            prediction = pred_tmp
-        else:
-            prediction = np.vstack((prediction, pred_tmp))
-
-        #print(len(prediction))
-        #print(type(prediction))
-
-    return prediction
+    data['Prediction'] = prediction
+    data['Prediction'] = data['Prediction'].apply(lambda l: np.rint(round(l)))
+    data.to_csv(output_name, sep=",")
