@@ -1,8 +1,8 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
 def data_exploration(data):
+    """Function for data exploration"""
     # 10'000 users and 1'000 films
 
     # Nbr Rate Per User
@@ -69,9 +69,12 @@ def data_exploration(data):
 
     plt.show()
 
+    #if we want to save figures
+    """
     f1.savefig('Figures/NbrRatePerUser.png')
     f2.savefig('Figures/NbrRatePerFilm.png')
     f3.savefig('Figures/FilmMean.png')
     f4.savefig('Figures/FilmVariance.png')
     f5.savefig('Figures/UserMean.png')
     f6.savefig('Figures/UserVariance.png')
+    """

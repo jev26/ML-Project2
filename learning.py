@@ -5,7 +5,7 @@ from surprise_models import *
 from simple_models import *
 
 def learning(trainset, testset, labels, PATHSAVE):
-
+    """Function to generate all models, train them and save predictions based on the testset"""
     baseline = surprise_baseline(trainset, testset)
     pickle.dump(baseline, open(PATHSAVE + 'baseline.pkl', 'wb'))
 
